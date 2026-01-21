@@ -1,0 +1,5 @@
+{
+  "name": "Letrabox Mockup Generator",
+  "description": "A specialized tool for generating visual communication mockups using AI. Applies logos to facades, vehicles, and uniforms based on user descriptions.",
+  "requestFramePermissions": []
+}
