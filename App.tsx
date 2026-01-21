@@ -5,11 +5,21 @@ import { ImageUploader } from './components/ImageUploader';
 import { StepIndicator } from './components/StepIndicator';
 import { generateMockup } from './services/geminiService';
 
+const MOCKUP_TYPES = [
+  "Fachada Comercial",
+  "Letreiro Interno / Recepção",
+  "Envelopamento de Veículo",
+  "Uniforme / Vestuário",
+  "Papel de Parede / Adesivo",
+  "Brindes Personalizados"
+];
+
 const App: React.FC = () => {
   const [step, setStep] = useState<AppStep>(AppStep.UPLOAD_BASE);
   const [state, setState] = useState<MockupState>({
     baseImage: null,
     logoImage: null,
+    mockupType: MOCKUP_TYPES[0],
     description: '',
     generatedImage: null,
     error: null,
@@ -21,6 +31,10 @@ const App: React.FC = () => {
 
   const handleLogoSelect = (base64: string) => {
     setState(prev => ({ ...prev, logoImage: base64, error: null }));
+  };
+
+  const handleMockupTypeChange = (type: string) => {
+    setState(prev => ({ ...prev, mockupType: type }));
   };
 
   const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -51,7 +65,8 @@ const App: React.FC = () => {
       const resultImage = await generateMockup(
         state.baseImage, 
         state.logoImage, 
-        state.description
+        state.description,
+        state.mockupType
       );
       
       setState(prev => ({ ...prev, generatedImage: resultImage }));
@@ -70,6 +85,7 @@ const App: React.FC = () => {
     setState({
       baseImage: null,
       logoImage: null,
+      mockupType: MOCKUP_TYPES[0],
       description: '',
       generatedImage: null,
       error: null,
@@ -78,20 +94,14 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col">
+    <div className="min-h-screen bg-zinc-950 flex flex-col">
       {/* Header */}
-      <header className="bg-slate-900 border-b border-slate-800 py-4 px-6 sticky top-0 z-50">
+      <header className="bg-zinc-900 border-b border-zinc-800 py-4 px-6 sticky top-0 z-50">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-             <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-red-600 rounded-lg flex items-center justify-center font-bold text-xl text-white">
-               L
-             </div>
-             <div>
-               <h1 className="text-xl font-bold text-white tracking-tight">letrabox</h1>
-               <p className="text-xs text-slate-400 font-medium tracking-wider uppercase">Visual Intelligence</p>
-             </div>
+          <div className="flex items-center">
+            <h1 className="text-3xl font-extrabold text-white tracking-tighter uppercase">LETRABOX</h1>
           </div>
-          <div className="hidden sm:block text-sm text-slate-400">
+          <div className="hidden sm:block text-sm text-zinc-400">
             Gerador de Mockups AI
           </div>
         </div>
@@ -104,7 +114,7 @@ const App: React.FC = () => {
           <StepIndicator currentStep={step} />
 
           {/* Card Container */}
-          <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 sm:p-10 shadow-2xl min-h-[500px] flex flex-col">
+          <div className="bg-zinc-900 rounded-2xl border border-zinc-800 p-6 sm:p-10 shadow-2xl min-h-[500px] flex flex-col">
             
             {/* Error Message */}
             {state.error && (
@@ -157,7 +167,7 @@ const App: React.FC = () => {
                     onClick={handleNext} 
                     disabled={!state.logoImage}
                   >
-                    Próximo: Descrever
+                    Próximo: Detalhes
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                     </svg>
@@ -166,33 +176,50 @@ const App: React.FC = () => {
               </div>
             )}
 
-            {/* STEP 3: DESCRIPTION */}
+            {/* STEP 3: DESCRIPTION & TYPE */}
             {step === AppStep.DESCRIBE && (
               <div className="flex-1 flex flex-col animate-fade-in">
                 <div className="flex-1">
-                  <h3 className="text-xl font-semibold text-white mb-2">Descreva a Aplicação</h3>
-                  <p className="text-slate-400 mb-6">Como o logotipo deve ser aplicado? Detalhe materiais, iluminação e posição.</p>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-700">
-                      <p className="text-xs text-slate-500 uppercase font-bold mb-2">Imagem Base</p>
-                      {state.baseImage && <img src={state.baseImage} alt="Base" className="h-32 object-contain mx-auto opacity-70" />}
-                    </div>
-                    <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-700">
-                      <p className="text-xs text-slate-500 uppercase font-bold mb-2">Logotipo</p>
-                      {state.logoImage && <img src={state.logoImage} alt="Logo" className="h-32 object-contain mx-auto opacity-70" />}
+                  <div className="flex items-center gap-4 mb-6">
+                     <div className="bg-zinc-800 p-2 rounded border border-zinc-700">
+                        {state.baseImage && <img src={state.baseImage} alt="Base" className="w-12 h-12 object-cover rounded opacity-80" />}
+                     </div>
+                     <div className="text-zinc-500 font-bold">+</div>
+                     <div className="bg-zinc-800 p-2 rounded border border-zinc-700">
+                        {state.logoImage && <img src={state.logoImage} alt="Logo" className="w-12 h-12 object-contain opacity-80" />}
+                     </div>
+                  </div>
+
+                  <div className="mb-6">
+                    <label className="block text-white font-semibold mb-3">Tipo de Aplicação</label>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {MOCKUP_TYPES.map((type) => (
+                        <button
+                          key={type}
+                          onClick={() => handleMockupTypeChange(type)}
+                          className={`
+                            p-3 text-sm rounded-lg border text-left transition-all
+                            ${state.mockupType === type 
+                              ? 'bg-orange-500/10 border-orange-500 text-orange-200 ring-1 ring-orange-500/50' 
+                              : 'bg-zinc-800/50 border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:border-zinc-600'}
+                          `}
+                        >
+                          {type}
+                        </button>
+                      ))}
                     </div>
                   </div>
 
                   <label className="block">
+                    <span className="block text-white font-semibold mb-2">Instruções de Instalação/Aplicação</span>
                     <textarea 
-                      className="w-full h-32 bg-slate-800 border-2 border-slate-700 rounded-lg p-4 text-white placeholder-slate-500 focus:border-orange-500 focus:outline-none transition-colors resize-none"
-                      placeholder="Ex: Fachada em ACM preto fosco com o logotipo centralizado em acrílico com iluminação interna (backlight). Manter o reflexo dos vidros."
+                      className="w-full h-32 bg-zinc-800 border-2 border-zinc-700 rounded-lg p-4 text-white placeholder-zinc-500 focus:border-orange-500 focus:outline-none transition-colors resize-none"
+                      placeholder="Descreva detalhes como materiais (ACM, Acrílico, Vinil), acabamento (Brilho, Fosco, LED), posição exata e efeitos desejados."
                       value={state.description}
                       onChange={handleDescriptionChange}
                     />
                   </label>
-                  <p className="text-xs text-slate-500 mt-2 text-right">{state.description.length} caracteres</p>
+                  <p className="text-xs text-zinc-500 mt-2 text-right">{state.description.length} caracteres</p>
                 </div>
 
                 <div className="mt-8 w-full flex justify-between gap-4">
@@ -217,7 +244,7 @@ const App: React.FC = () => {
             {step === AppStep.GENERATING && (
               <div className="flex-1 flex flex-col items-center justify-center animate-pulse">
                 <div className="relative w-24 h-24 mb-6">
-                  <div className="absolute inset-0 border-4 border-slate-700 rounded-full"></div>
+                  <div className="absolute inset-0 border-4 border-zinc-700 rounded-full"></div>
                   <div className="absolute inset-0 border-4 border-orange-500 rounded-full border-t-transparent animate-spin"></div>
                   <div className="absolute inset-0 flex items-center justify-center">
                     <svg className="w-8 h-8 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -225,9 +252,9 @@ const App: React.FC = () => {
                     </svg>
                   </div>
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-2">Criando seu Mockup</h3>
-                <p className="text-slate-400 text-center max-w-md">
-                  Nossa IA (Nano Banana) está analisando a estrutura, iluminação e perspectiva para aplicar sua marca...
+                <h3 className="text-2xl font-bold text-white mb-2">Processando {state.mockupType}</h3>
+                <p className="text-zinc-400 text-center max-w-md">
+                  Aplicando texturas, ajustando iluminação e renderizando o resultado final...
                 </p>
               </div>
             )}
@@ -236,8 +263,14 @@ const App: React.FC = () => {
             {step === AppStep.RESULT && state.generatedImage && (
               <div className="flex-1 flex flex-col animate-fade-in">
                 <div className="flex-1 flex flex-col items-center justify-center">
-                  <h3 className="text-xl font-semibold text-white mb-4 self-start">Resultado</h3>
-                  <div className="relative w-full rounded-xl overflow-hidden shadow-2xl bg-black border border-slate-700 group">
+                  <div className="flex items-center justify-between w-full mb-4">
+                    <h3 className="text-xl font-semibold text-white">Resultado Final</h3>
+                    <span className="text-xs font-mono text-zinc-500 border border-zinc-800 px-2 py-1 rounded bg-zinc-900/50">
+                      {state.mockupType}
+                    </span>
+                  </div>
+                  
+                  <div className="relative w-full rounded-xl overflow-hidden shadow-2xl bg-black border border-zinc-700 group">
                     <img 
                       src={state.generatedImage} 
                       alt="Mockup Gerado" 
@@ -247,7 +280,7 @@ const App: React.FC = () => {
                       <a 
                         href={state.generatedImage} 
                         download="letrabox-mockup.png"
-                        className="bg-white text-slate-900 px-4 py-2 rounded-lg font-bold hover:bg-slate-200 transition-colors shadow-lg flex items-center gap-2"
+                        className="bg-white text-zinc-900 px-4 py-2 rounded-lg font-bold hover:bg-zinc-200 transition-colors shadow-lg flex items-center gap-2"
                       >
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -256,14 +289,17 @@ const App: React.FC = () => {
                       </a>
                     </div>
                   </div>
-                  <p className="text-slate-500 text-sm mt-4 italic text-center max-w-2xl">
-                    "{state.description}"
-                  </p>
+                  <div className="mt-6 bg-zinc-950 p-4 rounded-lg border border-zinc-800 w-full">
+                    <p className="text-xs text-zinc-500 uppercase mb-1 font-bold">Instruções Utilizadas</p>
+                    <p className="text-zinc-400 text-sm italic">
+                      "{state.description}"
+                    </p>
+                  </div>
                 </div>
 
                 <div className="mt-8 w-full flex justify-between">
                   <Button onClick={() => setStep(AppStep.DESCRIBE)} variant="secondary">
-                    Refazer Prompt
+                    Ajustar Detalhes
                   </Button>
                   <Button onClick={handleReset} variant="outline">
                     Novo Projeto
@@ -277,7 +313,7 @@ const App: React.FC = () => {
       </main>
 
       {/* Footer */}
-      <footer className="py-6 text-center text-slate-600 text-sm border-t border-slate-900 bg-slate-950">
+      <footer className="py-6 text-center text-zinc-600 text-sm border-t border-zinc-900 bg-zinc-950">
         <p>© {new Date().getFullYear()} Letrabox Comunicação. Todos os direitos reservados.</p>
       </footer>
     </div>

@@ -9,6 +9,7 @@ export enum AppStep {
 export interface MockupState {
   baseImage: string | null; // Base64 string
   logoImage: string | null; // Base64 string
+  mockupType: string;
   description: string;
   generatedImage: string | null;
   error: string | null;
